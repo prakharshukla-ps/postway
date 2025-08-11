@@ -1,0 +1,349 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PostAWay API",
+    "description": "API for social networking platform",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "http://localhost:3000" }],
+  "components": {
+    "securitySchemes": {
+      "JWT": { "in": "header", "name": "Authorization", "type": "apiKey" }
+    }
+  },
+  "paths": {
+    "/api/signIn": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Login",
+        "description": "Authenticate user and return a JWT token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "user@example.com" },
+                  "password": { "type": "string", "example": "Pass@123" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OK" },
+          "400": { "description": "Incorrect credentials!" }
+        }
+      }
+    },
+    "/api/signUp": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Sign Up",
+        "description": "Create a new user account",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "John Doe" },
+                  "email": { "type": "string", "example": "john@example.com" },
+                  "password": { "type": "string", "example": "Pass@123" }
+                },
+                "required": ["name", "email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "OK" }
+        }
+      }
+    },
+    "/api/posts/all": {
+      "get": {
+        "tags": ["Posts"],
+        "summary": "Get all posts",
+        "description": "Retrieves all posts (supports pagination)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": { "type": "integer" },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": { "type": "integer" },
+            "description": "Posts per page"
+          },
+          {
+            "in": "query",
+            "name": "content",
+            "schema": { "type": "string" },
+            "description": "Search posts"
+          }
+        ],
+        "security": [{ "JWT": {} }],
+        "responses": {
+          "200": { "description": "OK" },
+          "401": { "description": "Unauthorized access!" }
+        }
+      }
+    },
+    "/api/posts/{id}": {
+      "get": {
+        "tags": ["Posts"],
+        "summary": "Get post by ID",
+        "description": "Retrieve a single post by its ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [{ "JWT": {} }],
+        "responses": {
+          "200": { "description": "OK" },
+          "404": { "description": "Post not found!" }
+        }
+      },
+      "put": {
+        "tags": ["Posts"],
+        "summary": "Update post",
+        "description": "Update an existing post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "caption": { "type": "string" },
+                  "imageUrl": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "JWT": {} }],
+        "responses": {
+          "200": { "description": "OK" },
+          "404": { "description": "Post not found!" }
+        }
+      },
+      "delete": {
+        "tags": ["Posts"],
+        "summary": "Delete post",
+        "description": "Delete a post by ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [{ "JWT": {} }],
+        "responses": {
+          "200": { "description": "OK" },
+          "404": { "description": "Post not found!" }
+        }
+      }
+    },
+    "/api/posts": {
+      "get": {
+        "tags": ["Posts"],
+        "summary": "Get posts of logged-in user",
+        "description": "Retrieves all posts created by the authenticated user",
+        "security": [{ "JWT": {} }],
+        "responses": {
+          "200": { "description": "OK" },
+          "404": { "description": "Post not found!" }
+        }
+      },
+      "post": {
+        "tags": ["Posts"],
+        "summary": "Create new post",
+        "description": "Create a new post with caption and image",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "caption": { "type": "string" },
+                  "imageUrl": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "JWT": {} }],
+        "responses": {
+          "201": { "description": "OK" }
+        }
+      }
+    },
+    "/api/comments/{postId}": {
+      "get": {
+        "tags": ["Comments"],
+        "summary": "Get all comments for a post",
+        "description": "Fetch all comments related to a specific post by postId",
+        "security": [{ "JWT": {} }],
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "OK" },
+          "401": { "description": "Unauthorized access!" }
+        }
+      },
+      "post": {
+        "tags": ["Comments"],
+        "summary": "Add a new comment to a post",
+        "description": "Create a new comment for the given postId",
+        "security": [{ "JWT": {} }],
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": { "type": "string" }
+                },
+                "required": ["content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "OK" },
+          "401": { "description": "Unauthorized access!" }
+        }
+      }
+    },
+    "/api/comments/{commentId}": {
+      "put": {
+        "tags": ["Comments"],
+        "summary": "Update a specific comment",
+        "description": "Modify an existing comment by commentId",
+        "security": [{ "JWT": {} }],
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": { "type": "string" }
+                },
+                "required": ["content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OK" },
+          "401": { "description": "Unauthorized access!" },
+          "404": { "description": "Comment not found!" }
+        }
+      },
+      "delete": {
+        "tags": ["Comments"],
+        "summary": "Delete a specific comment",
+        "description": "Remove a comment by commentId",
+        "security": [{ "JWT": {} }],
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "OK" },
+          "401": { "description": "Unauthorized access!" },
+          "404": { "description": "Comment not found!" }
+        }
+      }
+    },
+    "/api/likes/{postId}": {
+      "get": {
+        "tags": ["Likes"],
+        "summary": "Get all likes for a post",
+        "description": "Fetch all likes related to a specific post by postId",
+        "security": [{ "JWT": {} }],
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "OK" },
+          "401": { "description": "Unauthorized access!" }
+        }
+      }
+    },
+    "/api/likes/toggle/{postId}": {
+      "get": {
+        "tags": ["Likes"],
+        "summary": "Toggle like for a post",
+        "description": "Like or unlike a specific post based on current user status",
+        "security": [{ "JWT": {} }],
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Like toggled successfully" },
+          "401": { "description": "Unauthorized access!" }
+        }
+      }
+    }
+  }
+}
